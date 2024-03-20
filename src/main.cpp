@@ -25,7 +25,7 @@ void setup()
     // Aguarda até que o Serial esteja pronto
   }
 
-  // definindo curva do sinal em um período com pontos variando a cada 1 us (atende amostragem até 1 Msps)
+  // definindo curva do sinal em um período com pontos variando a cada 1 us (atende amostragem do DAC até 1 Msps)
   for (int i = 0; i < N_PONTOS; i++)
   {
     pt[i] = (sin(2 * PI * SIGNAL_FREQUENCY * i * 0.000001) + 1) * DAC_RESOLUTION / 2;
