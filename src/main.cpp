@@ -6,13 +6,13 @@
 #define DAC_RESOLUTION 1023.0 // Resolução do DAC (10 bits)
 #define DAC_MAX_VOLTAGE 3.3   // Tensão máxima de saída do DAC em volts
 
-#define SIGNAL_FREQUENCY 3000 // Frequência do SINAL GERADO
+#define SIGNAL_FREQUENCY 5000.0 // Frequência do SINAL GERADO
 
 // float phase = 0;                     // Fase inicial da onda
 // float deltaTime = 1.0 / SAMPLE_RATE; // Tempo entre as amostras
 
 int t1;
-#define N_PONTOS (1000000 / SIGNAL_FREQUENCY)
+#define N_PONTOS (round(1000000.0 / SIGNAL_FREQUENCY))
 
 int pt[N_PONTOS];
 
@@ -30,6 +30,10 @@ void setup()
   {
     pt[i] = (sin(2 * PI * SIGNAL_FREQUENCY * i * 0.000001) + 1) * DAC_RESOLUTION / 2;
   }
+
+  Serial.println("ok");
+
+  // analogWriteResolution(10);
 
   t1 = micros();
 }
@@ -78,7 +82,7 @@ void loop()
   // analogWrite(DAC_PIN, (sin(2 * PI * 2000 * phase) + 1) * 512 - 1);
   analogWrite(DAC_PIN, pt[dt]);
 
-  adcRead = analogRead(ADC_PIN);
+  // adcRead = analogRead(ADC_PIN);
 
   // Atualiza a fase para a próxima amostra
   // phase += deltaTime;
@@ -87,15 +91,15 @@ void loop()
   //  phase -= 1.0; // Mantém a fase entre 0 e 1
   //}
   // cont++;
-  dt2 = dt;
+  // dt2 = dt;
   dt = (dt + micros() - t1) % N_PONTOS;
 
-  Serial.print(pt[dt2]);
-  Serial.print('t');
-  Serial.print(adcRead);
-  Serial.print('t');
-  Serial.println(dt);
-  delay(200);
+  // Serial.print('t');
+  // Serial.print(adcRead);
+  // Serial.print('t');
+  // Serial.println(dt);
+  // delay(200);
+
   t1 = micros();
   /*if (cont >= 1000)
   {
