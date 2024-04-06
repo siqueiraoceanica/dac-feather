@@ -16,6 +16,8 @@ int t1;
 
 uint32_t pt[N_PONTOS];
 
+// teste
+
 uint32_t pts[N_PONTOS];
 uint32_t dts[N_PONTOS];
 
