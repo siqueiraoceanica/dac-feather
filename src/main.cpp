@@ -17,17 +17,17 @@
 // float deltaTime = 1.0 / SAMPLE_RATE; // Tempo entre as amostras
 
 int t1;
-#define N_PONTOS (round(1000000.0 / SIGNAL_FREQUENCY)) / 10
+#define N_PONTOS 5000
 
-uint32_t pt[N_PONTOS];
+uint16_t pt[N_PONTOS];
 
 // teste
 
-uint32_t pts[N_PONTOS];
-uint32_t dts[N_PONTOS];
+// uint32_t pts[N_PONTOS];
+// uint32_t dts[N_PONTOS];
 
 uint32_t dt = 0;
-uint32_t dtRel = 0;
+// uint32_t dtRel = 0;
 
 void setup()
 {
@@ -47,15 +47,16 @@ void setup()
   digitalWrite(GREEN_PIN, LOW);
 
   // definindo curva do sinal em um período com pontos variando a cada 1 us (atende amostragem do DAC até 1 Msps)
-  float factor = SIGNAL_AMP * DAC_RESOLUTION / (2.0 * DAC_MAX_VOLTAGE);
+  // float factor = SIGNAL_AMP * DAC_RESOLUTION / (2.0 * DAC_MAX_VOLTAGE);
   for (int i = 0; i < N_PONTOS; i++)
   {
-    pt[i] = round((sin(2 * PI * SIGNAL_FREQUENCY * i * 0.00001) + 1.0) * 7.75);
+    pt[i] = round((sin(2 * PI * SIGNAL_FREQUENCY * i * 0.000001 + PI) + 1.0) * 15);
+    Serial.println(pt[i]);
   }
 
   t1 = micros();
 
-  for (int i = 0; i < N_PONTOS; i++)
+  /*for (int i = 0; i < N_PONTOS; i++)
   {
     dtRel = dt % N_PONTOS;
     analogWrite(DAC_PIN, pt[dtRel]);
@@ -71,11 +72,9 @@ void setup()
     Serial.print(dts[i]);
     Serial.print('t');
     Serial.println(pts[i]);
-  }
+  }*/
 
   Serial.println("ok");
-
-  // analogWriteResolution(10);
 
   // Liga o LED VERDE para ostrar que o dispositivo está em operação
   digitalWrite(GREEN_PIN, HIGH);
@@ -84,45 +83,35 @@ void setup()
   t1 = micros();
 }
 
-int cont = 0;
-
 int dt2;
 
 int adcRead;
+int cont = 0;
+const int sizeDt = 1000;
+uint32_t dts[sizeDt];
 
 void loop()
 {
-  // Escreve o valor no DAC
-  dtRel = dt % N_PONTOS;
-  analogWrite(DAC_PIN, pt[dtRel]);
-  dt = (dt + micros() - t1);
-  t1 = micros();
-  delayMicroseconds(30);
-
-  // adcRead = analogRead(ADC_PIN);
-
-  // Atualiza a fase para a próxima amostra
-  // phase += deltaTime;
-  // if (phase >= 1.0)
-  //{
-  //  phase -= 1.0; // Mantém a fase entre 0 e 1
-  //}
-  // cont++;
-  // dt2 = dt;
-
-  // Serial.print('t');
-  // Serial.print(adcRead);
-  // Serial.print('t');
-  // Serial.println(dt);
-  // delay(200);
-
-  /*if (cont >= 1000)
+  cont++;
+  if (cont < sizeDt)
   {
-    int dt = micros() - t1;
-    cont = 0;
-    Serial.print("Tempo (us) para 1000 amostras: ");
-    Serial.println(dt);
-    delay(10000);
-    t1 = micros();
-  }*/
+    dts[cont - 1] = analogRead(A5);
+  }
+  if (cont == sizeDt)
+  {
+    for (int i = 0; i < sizeDt; i++)
+    {
+      Serial.println(dts[i]);
+    }
+  }
+  // Escreve o valor no DAC
+  // dtRel = dt % N_PONTOS;
+  // dtRel = dt;
+
+  // dt = (dt + micros() - t1);
+  dt = (dt + micros() - t1) % N_PONTOS;
+
+  analogWrite(DAC_PIN, pt[dt]);
+  t1 = micros();
+  delayMicroseconds(200);
 }
