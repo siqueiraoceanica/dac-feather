@@ -50,7 +50,7 @@ void setup()
   // float factor = SIGNAL_AMP * DAC_RESOLUTION / (2.0 * DAC_MAX_VOLTAGE);
   for (int i = 0; i < N_PONTOS; i++)
   {
-    pt[i] = round((sin(2 * PI * SIGNAL_FREQUENCY * i * 0.000001 + PI) + 1.0) * 15);
+    pt[i] = round((sin(2 * PI * SIGNAL_FREQUENCY * i * 0.000001 + PI) + 50.0) * 1);
     Serial.println(pt[i]);
   }
 
@@ -95,7 +95,7 @@ void loop()
   cont++;
   if (cont < sizeDt)
   {
-    dts[cont - 1] = analogRead(A5);
+    dts[cont - 1] = dt;
   }
   if (cont == sizeDt)
   {
@@ -113,5 +113,5 @@ void loop()
 
   analogWrite(DAC_PIN, pt[dt]);
   t1 = micros();
-  delayMicroseconds(200);
+  delayMicroseconds(40);
 }
