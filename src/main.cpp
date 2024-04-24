@@ -1,128 +1,82 @@
-#include <Arduino.h>
+/**************************************************************************/
+/*!
+    @file     trianglewave.pde
+    @author   Adafruit Industries
+    @license  BSD (see license.txt)
 
-#define DAC_PIN A0 // Pino conectado ao DAC
-#define ADC_PIN A1 // Pino conectado ao ADC
+    This example will generate a triangle wave with the MCP4725 DAC.
 
+    This is an example sketch for the Adafruit MCP4725 breakout board
+    ----> http://www.adafruit.com/products/935
+
+    Adafruit invests time and resources providing this open source code,
+    please support Adafruit and open-source hardware by purchasing
+    products from Adafruit!
+*/
+/**************************************************************************/
+#include <Wire.h>
+#include <Adafruit_MCP4725.h>
+
+Adafruit_MCP4725 dac;
 #define GREEN_PIN 8 // Define o pino do LED VERDE
 
-#define DEPURAR false // Se o sistema estiver sendo depurado com
+const int numPontos = 20;            // Número de pontos da onda senoidal
+float senoTable[numPontos];          // Tabela para armazenar os valores da onda senoidal
+const float amplitudeInicial = 10.0; // Amplitude inicial
+const int passoAmplitude = 10;       // Passo de aumento de amplitude a cada ciclo
+const float frequencia = 500.0;      // Frequência da onda senoidal em Hz
 
-#define DAC_RESOLUTION 1023.0  // Resolução do DAC (10 bits)
-#define DAC_MAX_VOLTAGE 3300.0 // Tensão máxima de saída do DAC em mV
-
-#define SIGNAL_FREQUENCY 200.0 // Frequência do SINAL GERADO
-#define SIGNAL_AMP 100.0       // Amplitude do SINAL GERADO (mV)
-
-// float phase = 0;                     // Fase inicial da onda
-// float deltaTime = 1.0 / SAMPLE_RATE; // Tempo entre as amostras
-
-int t1;
-#define N_PONTOS (round(1000000.0 / SIGNAL_FREQUENCY)) / 10
-
-uint32_t pt[N_PONTOS];
-
-// teste
-
-uint32_t pts[N_PONTOS];
-uint32_t dts[N_PONTOS];
-
-uint32_t dt = 0;
-uint32_t dtRel = 0;
-
-void setup()
+void setup(void)
 {
-
-#if DEPURAR
+  // Pré-calcular os valores da onda senoidal
+  for (int i = 0; i < numPontos; i++)
+  {
+    float t = i * (1.0 / frequencia) / numPontos;
+    senoTable[i] = sin(2 * M_PI * frequencia * t);
+  }
+  pinMode(GREEN_PIN, OUTPUT);
   Serial.begin(9600);
   // Aguarda até que o Serial esteja pronto
-  while (!Serial)
-  {
-  }
-#endif
+  // while (!Serial)
+  //{
+  //}
+  Serial.println("Hello!");
 
-  // Inicializa o pino do LED VERDE como saída
-  pinMode(GREEN_PIN, OUTPUT);
+  // For Adafruit MCP4725A1 the address is 0x62 (default) or 0x63 (ADDR pin tied to VCC)
+  // For MCP4725A0 the address is 0x60 or 0x61
+  // For MCP4725A2 the address is 0x64 or 0x65
+  dac.begin(0x60);
 
-  // Desliga o LED VERDE
-  digitalWrite(GREEN_PIN, LOW);
+  Serial.println("Generating a triangle wave");
 
-  // definindo curva do sinal em um período com pontos variando a cada 1 us (atende amostragem do DAC até 1 Msps)
-  float factor = SIGNAL_AMP * DAC_RESOLUTION / (2.0 * DAC_MAX_VOLTAGE);
-  for (int i = 0; i < N_PONTOS; i++)
-  {
-    pt[i] = round((sin(2 * PI * SIGNAL_FREQUENCY * i * 0.00001) + 1.0) * 7.75);
-  }
-
-  t1 = micros();
-
-  for (int i = 0; i < N_PONTOS; i++)
-  {
-    dtRel = dt % N_PONTOS;
-    analogWrite(DAC_PIN, pt[dtRel]);
-    dts[i] = dt;
-    pts[i] = pt[dtRel];
-    dt = (dt + micros() - t1);
-    t1 = micros();
-    delayMicroseconds(100);
-  }
-
-  for (int i = 0; i < N_PONTOS; i++)
-  {
-    Serial.print(dts[i]);
-    Serial.print('t');
-    Serial.println(pts[i]);
-  }
-
-  Serial.println("ok");
-
-  // analogWriteResolution(10);
-
-  // Liga o LED VERDE para ostrar que o dispositivo está em operação
+  analogReadResolution(12);
   digitalWrite(GREEN_PIN, HIGH);
-
-  dt = 0;
-  t1 = micros();
 }
 
-int cont = 0;
-
-int dt2;
-
-int adcRead;
-
-void loop()
+uint16_t amp = 1;
+uint16_t contCiclos;
+bool aumentaAmp = true;
+void loop(void)
 {
-  // Escreve o valor no DAC
-  dtRel = dt % N_PONTOS;
-  analogWrite(DAC_PIN, pt[dtRel]);
-  dt = (dt + micros() - t1);
-  t1 = micros();
-  delayMicroseconds(30);
-
-  // adcRead = analogRead(ADC_PIN);
-
-  // Atualiza a fase para a próxima amostra
-  // phase += deltaTime;
-  // if (phase >= 1.0)
-  //{
-  //  phase -= 1.0; // Mantém a fase entre 0 e 1
-  //}
-  // cont++;
-  // dt2 = dt;
-
-  // Serial.print('t');
-  // Serial.print(adcRead);
-  // Serial.print('t');
-  // Serial.println(dt);
-  // delay(200);
-
-  /*if (cont >= 1000)
+  // Variando a amplitude de 5 em 5 a cada ciclo do sinal
+  for (int i = 5; i <= 500; i += 5)
   {
-    int dt = micros() - t1;
-    cont = 0;
-    Serial.print("Tempo (us) para 1000 amostras: ");
-    Serial.println(dt);
-    delay(10000);
-    t1 = micros();
-  }*/
+    for (int j = 0; j < numPontos; j++)
+    {
+      int valorDAC = i * senoTable[j] + 2048; // Conversão para o valor do DAC
+      dac.setVoltage(valorDAC, false);
+      delayMicroseconds(100);
+    }
+  }
+
+  // Voltando a amplitude para 495, 490, ..., 5
+  for (int i = 495; i >= 5; i -= 5)
+  {
+    for (int j = 0; j < numPontos; j++)
+    {
+      int valorDAC = i * senoTable[j] + 2048; // Conversão para o valor do DAC
+      dac.setVoltage(valorDAC, false);
+      delayMicroseconds(100);
+    }
+  }
 }
