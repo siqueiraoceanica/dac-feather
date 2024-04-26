@@ -20,11 +20,9 @@
 Adafruit_MCP4725 dac;
 #define GREEN_PIN 8 // Define o pino do LED VERDE
 
-const int numPontos = 20;            // Número de pontos da onda senoidal
-float senoTable[numPontos];          // Tabela para armazenar os valores da onda senoidal
-const float amplitudeInicial = 10.0; // Amplitude inicial
-const int passoAmplitude = 10;       // Passo de aumento de amplitude a cada ciclo
-const float frequencia = 500.0;      // Frequência da onda senoidal em Hz
+const int numPontos = 20;       // Número de pontos da onda senoidal
+float senoTable[numPontos];     // Tabela para armazenar os valores da onda senoidal
+const float frequencia = 500.0; // Frequência da onda senoidal em Hz
 
 void setup(void)
 {
@@ -58,8 +56,8 @@ uint16_t contCiclos;
 bool aumentaAmp = true;
 void loop(void)
 {
-  // Variando a amplitude de 5 em 5 a cada ciclo do sinal
-  for (int i = 5; i <= 500; i += 5)
+  // a cada 5 é amplitude de 8 mV
+  for (int i = 5; i <= 1000; i += 5)
   {
     for (int j = 0; j < numPontos; j++)
     {
@@ -69,8 +67,8 @@ void loop(void)
     }
   }
 
-  // Voltando a amplitude para 495, 490, ..., 5
-  for (int i = 495; i >= 5; i -= 5)
+  // a cada 5 é amplitude de 8 mV
+  for (int i = 995; i >= 5; i -= 5)
   {
     for (int j = 0; j < numPontos; j++)
     {
