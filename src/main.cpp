@@ -57,7 +57,7 @@ bool aumentaAmp = true;
 void loop(void)
 {
   // a cada 5 é amplitude de 8 mV
-  for (int i = 5; i <= 500; i += 5)
+  for (int i = 2; i <= 500; i += 2)
   {
     for (int j = 0; j < numPontos; j++)
     {
@@ -68,7 +68,7 @@ void loop(void)
   }
 
   // a cada 5 é amplitude de 8 mV
-  for (int i = 495; i >= 5; i -= 5)
+  for (int i = 498; i >= 2; i -= 2)
   {
     for (int j = 0; j < numPontos; j++)
     {
